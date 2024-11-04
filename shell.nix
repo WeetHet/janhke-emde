@@ -1,8 +1,9 @@
 { pkgs ? import <nixpkgs> { } }:
 let
-  inherit (import ./from-sources.nix {
+  inherit (import ./nix/from-sources.nix {
     inherit pkgs;
     sources = import ./npins;
+    workspaceRoot = ./.;
   }) workspace pythonSet;
   editableOverlay = workspace.mkEditablePyprojectOverlay {
     root = "$REPO_ROOT";
