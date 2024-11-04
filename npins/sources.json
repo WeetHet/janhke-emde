@@ -1,5 +1,17 @@
 {
   "pins": {
+    "flake-compat": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "flake-compat"
+      },
+      "branch": "master",
+      "revision": "38fd3954cf65ce6faf3d0d45cd26059e059f07ea",
+      "url": "https://github.com/nix-community/flake-compat/archive/38fd3954cf65ce6faf3d0d45cd26059e059f07ea.tar.gz",
+      "hash": "1lgx0c0n0hw1ds1in497w3c86ki0iksi59h6daphpl7rj5w65f8n"
+    },
     "pyproject-nix": {
       "type": "Git",
       "repository": {

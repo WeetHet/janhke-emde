@@ -1,4 +1,7 @@
 *
+
+!.envrc
+
 !npins
 !npins/sources.json
 !npins.default.nix

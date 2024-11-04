@@ -1,7 +1,7 @@
 { pkgs, sources, workspaceRoot }:
 let
   inherit (pkgs) lib;
-  uv2nix = (import ./flake-compat.nix { src = sources.uv2nix; }).outputs;
+  uv2nix = (import sources.flake-compat { src = sources.uv2nix; }).defaultNix;
   pyproject-nix = import sources.pyproject-nix { inherit lib; };
 in
 import ./mkPythonSet.nix {
