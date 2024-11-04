@@ -3,7 +3,7 @@ name = "janhke_emde"
 version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["matplotlib~=3.9"]
 
 [project.scripts]
 hello = "janhke_emde:hello"
