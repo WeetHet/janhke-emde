@@ -1,10 +1,15 @@
-{ pkgs ? import <nixpkgs> { } }:
+{
+  pyproject-nix,
+  uv2nix,
+  devshell,
+  uv,
+  callPackage,
+}:
 let
-  inherit (import ./nix/from-sources.nix {
-    inherit pkgs;
-    sources = import ./npins;
-    workspaceRoot = ./.;
-  }) workspace pythonSet;
+  workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = ./.; };
+  pythonSet = callPackage ./nix/mkPythonSet.nix {
+    inherit pyproject-nix workspace;
+  };
   editableOverlay = workspace.mkEditablePyprojectOverlay {
     root = "$REPO_ROOT";
   };
@@ -13,13 +18,26 @@ let
     janhke-emde = [ ];
   };
 in
-pkgs.mkShell {
+devshell.mkShell {
   packages = [
     virtualenv
-    pkgs.uv
+    uv
   ];
-  shellHook = ''
-    unset PYTHONPATH
-    export REPO_ROOT=$(git rev-parse --show-toplevel)
-  '';
+  env = [
+    {
+      name = "PYTHONPATH";
+      unset = true;
+    }
+    {
+      name = "REPO_ROOT";
+      eval = "$(git rev-parse --show-toplevel)";
+    }
+  ];
+  commands = [
+    {
+      help = "add a dependency cleaning up afterwards";
+      name = "uv-add";
+      command = "uv add $1 && rm -rf .venv";
+    }
+  ];
 }

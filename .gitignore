@@ -2,10 +2,6 @@
 
 !.envrc
 
-!npins
-!npins/sources.json
-!npins.default.nix
-
 !src
 !src/janhke_emde
 !src/janhke_emde/*.py
@@ -15,6 +11,8 @@
 
 !.gitignore
 
+!flake.nix
+!flake.lock
 !default.nix
 !shell.nix
 !from-sources.nix
