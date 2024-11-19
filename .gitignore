@@ -3,8 +3,7 @@
 !.envrc
 
 !src
-!src/janhke_emde
-!src/janhke_emde/*.py
+!src/*.py
 
 !pyproject.toml
 !uv.lock
