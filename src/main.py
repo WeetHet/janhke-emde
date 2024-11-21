@@ -76,26 +76,32 @@ def gradient_line(
     in_bounding_box: Callable[[Callable[[float, float], float], float, float], bool],
     sx: float,
     sy: float,
-    step=1e-1,
+    gamma: float,
+    alpha: float,
     maxiter: int = -1,
 ) -> np.ndarray:
     a = np.array((sx, sy))
     pts = [a]
 
-    grad = np.array((diff(f, sx, sy, 1, 0), diff(f, sx, sy, 0, 1)))
-    grad_norm = grad / np.linalg.norm(grad)
+    def do_step(p: np.ndarray, e: float) -> tuple[np.ndarray, float]:
+        grad = np.array((diff(f, *p, 1, 0), diff(f, *p, 0, 1)))  # type: ignore
+        e = float(gamma * e + (1 - gamma) * np.sum(grad**2))
+        return (p + alpha * grad / np.sqrt(e + 1e-8), e)
 
-    b = a + grad_norm * step
+    (b, e) = do_step(a, 0)
     it = 1
     while in_bounding_box(f, *b) and it != maxiter:
         pts.append(b)
 
-        new_grad = np.array((diff(f, *b, 1, 0), diff(f, *b, 0, 1)))
-        new_grad_norm = new_grad / np.linalg.norm(new_grad)
-        a, b = b, b + new_grad_norm * step
+        a, (b, e) = b, do_step(b, e)
         it += 1
 
+    pts.append(b)
     return np.array(pts)
+
+
+# def find_saddle_points(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
+#     pass
 
 
 def decompose_levels_as_cycles_and_paths(
@@ -156,15 +162,15 @@ def plot_surface_with_levels():
     buffer = np.zeros((4 * x.shape[0] * y.shape[1], 2, 3))
 
     print("Working on level ", end="")
-    for level in np.arange(0.2, 5.2, 0.2):
-        print(f"{level:.1f}", end=", " if level != 5.0 else "\n", flush=True)
+    for level in np.arange(0.2, 5, 0.2):
+        print(f"{level:.1f}", end="; ", flush=True)
         find_level_segments(x, y, z, level, buffer)
 
         nan_2d_mask = np.isnan(buffer)
         non_nan_mask = ~np.any(nan_2d_mask, axis=(1, 2))
 
         segments = buffer[non_nan_mask]
-        cycles, paths, graph = decompose_levels_as_cycles_and_paths(segments)
+        cycles, paths, _ = decompose_levels_as_cycles_and_paths(segments)
         for cycle in cycles + paths:
             points = cycle[:, :2]
             dx = diff(gamma2d, points[:, 0], points[:, 1], 1, 0)
@@ -185,6 +191,31 @@ def plot_surface_with_levels():
 
             curve = pv.lines_from_points(moved_points)
             plotter.add_mesh(curve, color="black", line_width=2)
+    print()
+
+    print("Drawing upper caps...")
+    find_level_segments(x, y, z, 5.0 - 1e-3, buffer)
+    nan_2d_mask = np.isnan(buffer)
+    non_nan_mask = ~np.any(nan_2d_mask, axis=(1, 2))
+
+    segments = buffer[non_nan_mask]
+    cycles, paths, _ = decompose_levels_as_cycles_and_paths(segments)
+
+    print("Filling in the cycles...")
+    for cycle in filter(lambda c: len(c) > 1, cycles):
+        lifted_cycle = cycle.copy()
+        lifted_cycle[:, 2] += 5e-3
+        poly = pv.PolyData(lifted_cycle)
+        poly = poly.delaunay_2d()
+        plotter.add_mesh(poly, color="black")
+
+    print("Filling in the paths...")
+    for path in filter(lambda p: len(p) > 1, paths):
+        lifted_path = path.copy()
+        lifted_path[:, 2] += 5e-3
+        poly = pv.PolyData(lifted_path)
+        poly = poly.delaunay_2d()
+        plotter.add_mesh(poly, color="black")
 
     print("Drawing gradient lines...")
 
@@ -206,7 +237,13 @@ def plot_surface_with_levels():
     # Draw gradient lines from each starting point
     for start_pt in starting_points:
         gradient_pts = gradient_line(
-            gamma2d, in_bounds, start_pt[0], start_pt[1], maxiter=10000
+            gamma2d,
+            in_bounds,
+            start_pt[0],
+            start_pt[1],
+            gamma=0.9,
+            alpha=0.01,
+            maxiter=100000,
         )
         gradient_z = gamma2d(gradient_pts[:, 0], gradient_pts[:, 1])
         points_3d = np.column_stack((gradient_pts, gradient_z))
@@ -225,7 +262,20 @@ def plot_surface_with_levels():
             / (gradient_magnitudes[:, np.newaxis] + 1e-8)
         )
 
-        moved_points = points_3d + offsets
+        moved_points = np.clip(
+            points_3d + offsets,
+            np.array([x_min, y_min, 0]),
+            np.array([x_max, y_max, 5]),
+        )
+
+        zl_eps = 5.0 + 2e-3
+        if len(moved_points) > 0 and abs(moved_points[-1, 2] - 5.0) < 0.5:
+            moved_points[-1, 2] = zl_eps
+            n_points = min(5, len(moved_points))
+            for i in range(n_points):
+                idx = -1 - i
+                t = i / n_points
+                moved_points[idx, 2] = zl_eps * (1 - t) + moved_points[idx, 2] * t
 
         gradient_curve = pv.lines_from_points(moved_points)
         plotter.add_mesh(gradient_curve, color="black", line_width=2)
