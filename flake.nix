@@ -13,23 +13,28 @@
   };
 
   outputs =
-    inputs@{ flake-parts, ... }:
+    inputs@{ self, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = inputs.nixpkgs.lib.systems.flakeExposed;
       imports = [ inputs.treefmt-nix.flakeModule ];
+
+      flake = {
+        project = inputs.pyproject-nix.lib.project.loadPyproject {
+          projectRoot = ./.;
+        };
+      };
 
       perSystem =
         { pkgs, ... }:
         {
           packages.default = pkgs.callPackage ./defs/package.nix {
-            inherit (inputs) pyproject-nix;
+            inherit (self) project;
           };
 
           devShells.default = pkgs.mkShellNoCC {
             packages = [
-              (import ./defs/pythonEnv.nix {
-                inherit (pkgs) python3;
-                inherit (inputs) pyproject-nix;
+              (pkgs.callPackage ./defs/pythonEnv.nix {
+                inherit (self) project;
               })
               pkgs.ruff
             ];

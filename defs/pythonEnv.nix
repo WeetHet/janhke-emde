@@ -1,11 +1,5 @@
 {
-  pyproject-nix,
   python3,
+  project,
 }:
-let
-  project = pyproject-nix.lib.project.loadPyproject {
-    projectRoot = ../.;
-  };
-  python = python3;
-in
-python.withPackages (project.renderers.withPackages { inherit python; })
+python3.withPackages (project.renderers.withPackages { python = python3; })
