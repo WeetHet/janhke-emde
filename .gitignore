@@ -3,7 +3,8 @@
 !.envrc
 
 !src
-!src/*.py
+!src/janhke_emde
+!src/janhke_emde/*.py
 
 !pyproject.toml
 !uv.lock
@@ -14,6 +15,9 @@
 !flake.lock
 !default.nix
 !shell.nix
-!from-sources.nix
+
 !nix
 !nix/*.nix
+
+!defs
+!defs/*nix

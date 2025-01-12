@@ -5,18 +5,25 @@
       url = "github:nix-community/flakelight";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-  };
-  outputs = { flakelight, ... }:
-    flakelight ./. {
-      systems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "aarch64-darwin"
-        "x86_64-darwin"
-      ];
-      devShell.packages = pkgs: [
-        (pkgs.python3.withPackages (ps: [ ps.pyvista ps.scipy ps.networkx ps.numba ]))
-      ];
-      formatter = pkgs: pkgs.nixfmt-rfc-style;
+    pyproject-nix = {
+      url = "github:pyproject-nix/pyproject.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
+  };
+  outputs =
+    { flakelight, pyproject-nix, ... }:
+    flakelight ./. (
+      { lib, ... }:
+      {
+        systems = lib.systems.flakeExposed;
+        package = { callPackage }: callPackage ./defs/package.nix { inherit pyproject-nix; };
+        devShell.packages = pkgs: [
+          (import ./defs/pythonEnv.nix {
+            inherit (pkgs) python3;
+            inherit pyproject-nix;
+          })
+        ];
+        formatter = pkgs: pkgs.nixfmt-rfc-style;
+      }
+    );
 }
