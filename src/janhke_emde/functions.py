@@ -1,5 +1,4 @@
 import numpy as np
-import numpy.typing as nt
 from scipy.special import gamma
 
 
