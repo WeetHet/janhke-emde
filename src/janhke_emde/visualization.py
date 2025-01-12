@@ -2,30 +2,52 @@ import numpy as np
 import pyvista as pv
 from janhke_emde.config import VisualizationConfig
 from janhke_emde.functions import gamma2d, diff
-from janhke_emde.level_curves import find_level_segments, decompose_levels_as_cycles_and_paths
+from janhke_emde.level_curves import (
+    find_level_segments,
+    decompose_levels_as_cycles_and_paths,
+)
 from janhke_emde.gradient_lines import gradient_line
+
 
 def print_with_config(config: VisualizationConfig, *args, **kwargs):
     if config.log_steps:
         print(*args, **kwargs)
 
-def create_mesh_grid(config: VisualizationConfig) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+def create_mesh_grid(
+    config: VisualizationConfig,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     print_with_config(config, "Creating meshgrid...")
     x, y = np.meshgrid(
         np.linspace(config.bounds.xl, config.bounds.xu, config.mesh_points),
-        np.linspace(config.bounds.yl, config.bounds.yu, config.mesh_points)
+        np.linspace(config.bounds.yl, config.bounds.yu, config.mesh_points),
     )
     print_with_config(config, "Computing function values and clipping...")
     z = np.clip(config.func(x, y), config.bounds.zl, config.bounds.zu)
     return x, y, z
 
-def setup_surface(plotter: pv.Plotter, x: np.ndarray, y: np.ndarray, z: np.ndarray, config: VisualizationConfig) -> None:
+
+def setup_surface(
+    plotter: pv.Plotter,
+    x: np.ndarray,
+    y: np.ndarray,
+    z: np.ndarray,
+    config: VisualizationConfig,
+) -> None:
     print_with_config(config, "Setting up 3D plot...")
     grid = pv.StructuredGrid(x, y, z)
     print_with_config(config, "Plotting surface...")
     plotter.add_mesh(grid, color="white", show_edges=False, lighting=False)
 
-def plot_level_curves(plotter: pv.Plotter, x: np.ndarray, y: np.ndarray, z: np.ndarray, buffer: np.ndarray, config: VisualizationConfig) -> None:
+
+def plot_level_curves(
+    plotter: pv.Plotter,
+    x: np.ndarray,
+    y: np.ndarray,
+    z: np.ndarray,
+    buffer: np.ndarray,
+    config: VisualizationConfig,
+) -> None:
     print_with_config(config, "Working on level ", end="")
     for level in np.arange(config.level_start, config.level_end, config.level_step):
         print_with_config(config, f"{level:.1f}", end="; ", flush=True)
@@ -58,26 +80,35 @@ def plot_level_curves(plotter: pv.Plotter, x: np.ndarray, y: np.ndarray, z: np.n
             plotter.add_mesh(curve, color="black", line_width=2)
     print_with_config(config)
 
+
 def plot_gradient_lines(plotter: pv.Plotter, config: VisualizationConfig) -> None:
     print_with_config(config, "Drawing gradient lines...")
 
     points_per_side = config.gradient_points
-    left_points = np.column_stack((
-        np.full(points_per_side, config.bounds.xl),
-        np.linspace(config.bounds.yl, config.bounds.yu, points_per_side)
-    ))
-    right_points = np.column_stack((
-        np.full(points_per_side, config.bounds.xu),
-        np.linspace(config.bounds.yl, config.bounds.yu, points_per_side)
-    ))
-    bottom_points = np.column_stack((
-        np.linspace(config.bounds.xl, config.bounds.xu, points_per_side),
-        np.full(points_per_side, config.bounds.yl)
-    ))
-    top_points = np.column_stack((
-        np.linspace(config.bounds.xl, config.bounds.xu, points_per_side),
-        np.full(points_per_side, config.bounds.yu)
-    ))
+    left_points = np.column_stack(
+        (
+            np.full(points_per_side, config.bounds.xl),
+            np.linspace(config.bounds.yl, config.bounds.yu, points_per_side),
+        )
+    )
+    right_points = np.column_stack(
+        (
+            np.full(points_per_side, config.bounds.xu),
+            np.linspace(config.bounds.yl, config.bounds.yu, points_per_side),
+        )
+    )
+    bottom_points = np.column_stack(
+        (
+            np.linspace(config.bounds.xl, config.bounds.xu, points_per_side),
+            np.full(points_per_side, config.bounds.yl),
+        )
+    )
+    top_points = np.column_stack(
+        (
+            np.linspace(config.bounds.xl, config.bounds.xu, points_per_side),
+            np.full(points_per_side, config.bounds.yu),
+        )
+    )
 
     starting_points = np.vstack((left_points, right_points, bottom_points, top_points))
 
@@ -122,7 +153,15 @@ def plot_gradient_lines(plotter: pv.Plotter, config: VisualizationConfig) -> Non
         gradient_curve = pv.lines_from_points(moved_points)
         plotter.add_mesh(gradient_curve, color="black", line_width=2)
 
-def plot_upper_caps(plotter: pv.Plotter, x: np.ndarray, y: np.ndarray, z: np.ndarray, buffer: np.ndarray, config: VisualizationConfig) -> None:
+
+def plot_upper_caps(
+    plotter: pv.Plotter,
+    x: np.ndarray,
+    y: np.ndarray,
+    z: np.ndarray,
+    buffer: np.ndarray,
+    config: VisualizationConfig,
+) -> None:
     print_with_config(config, "Drawing upper caps...")
     find_level_segments(x, y, z, config.level_end - 1e-3, buffer)
     nan_2d_mask = np.isnan(buffer)
@@ -147,6 +186,7 @@ def plot_upper_caps(plotter: pv.Plotter, x: np.ndarray, y: np.ndarray, z: np.nda
         poly = poly.delaunay_2d()
         plotter.add_mesh(poly, color="black")
 
+
 def visualize_surface(config: VisualizationConfig) -> None:
     """Main entry point for visualizing the Jahnke-Emde surface with level curves and gradient lines."""
     plotter = pv.Plotter()
@@ -159,5 +199,5 @@ def visualize_surface(config: VisualizationConfig) -> None:
     plot_gradient_lines(plotter, config)
 
     print_with_config(config, "Showing plot...")
-    plotter.view_isometric() # type: ignore
+    plotter.view_isometric()  # type: ignore
     plotter.show()

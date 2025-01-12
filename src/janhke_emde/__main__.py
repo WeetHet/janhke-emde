@@ -3,7 +3,7 @@ from janhke_emde import (
     Bounds3D,
     gamma2d,
     visualize_surface,
-    main
+    main,
 )
 
 if __name__ == "__main__":

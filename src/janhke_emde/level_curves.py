@@ -2,16 +2,16 @@ import numpy as np
 import networkx as nx
 from numba import jit, prange
 
+
 @jit(nopython=True)
-def _get_level_point(
-    a: np.ndarray, b: np.ndarray, level: float
-) -> np.ndarray:
+def _get_level_point(a: np.ndarray, b: np.ndarray, level: float) -> np.ndarray:
     if a[2] > b[2]:
         a, b = b, a
     if a[2] <= level <= b[2]:
         vec = b - a
         return a + vec / np.linalg.norm(vec) * (level - a[2])
     return np.full(3, np.nan)
+
 
 @jit(nopython=True)
 def all_levels(pts: np.ndarray, level: float):
@@ -21,6 +21,7 @@ def all_levels(pts: np.ndarray, level: float):
         level_point = _get_level_point(a, b, level)
         all_level_points[i] = level_point
     return all_level_points
+
 
 @jit(nopython=True, parallel=True)
 def find_level_segments(
@@ -52,6 +53,7 @@ def find_level_segments(
                 buffer[count + idx] = np.full((2, 3), np.nan)
 
     return buffer
+
 
 def decompose_levels_as_cycles_and_paths(
     segments: np.ndarray, tolerance: float = 1e-6

@@ -22,6 +22,7 @@
             inherit (pkgs) python3;
             inherit pyproject-nix;
           })
+          pkgs.ruff
         ];
         formatter = pkgs: pkgs.nixfmt-rfc-style;
       }
