@@ -1,9 +1,9 @@
 import numpy as np
 import networkx as nx
-from numba import jit, prange
+from numba import njit, prange
 
 
-@jit(nopython=True)
+@njit
 def _get_level_point(a: np.ndarray, b: np.ndarray, level: float) -> np.ndarray:
     if a[2] > b[2]:
         a, b = b, a
@@ -13,7 +13,7 @@ def _get_level_point(a: np.ndarray, b: np.ndarray, level: float) -> np.ndarray:
     return np.full(3, np.nan)
 
 
-@jit(nopython=True)
+@njit
 def all_levels(pts: np.ndarray, level: float):
     all_level_points = np.zeros((len(pts), 3))
     for i in prange(len(pts)):
@@ -23,7 +23,7 @@ def all_levels(pts: np.ndarray, level: float):
     return all_level_points
 
 
-@jit(nopython=True, parallel=True)
+@njit(nopython=True, parallel=True)
 def find_level_segments(
     x: np.ndarray, y: np.ndarray, z: np.ndarray, level: float, buffer: np.ndarray
 ) -> np.ndarray:
@@ -33,9 +33,11 @@ def find_level_segments(
         for j in prange(y_iter):
             pts = np.empty((4, 3))
             for n, (di, dj) in enumerate(((0, 0), (0, 1), (1, 1), (1, 0))):
-                pts[n] = np.array(
-                    (x[i + di, j + dj], y[i + di, j + dj], z[i + di, j + dj])
-                )
+                pts[n] = np.array((
+                    x[i + di, j + dj],
+                    y[i + di, j + dj],
+                    z[i + di, j + dj],
+                ))
             all_level_points = all_levels(pts, level)
             xs, ys, zs = (
                 all_level_points[:, 0],
