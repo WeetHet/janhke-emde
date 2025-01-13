@@ -52,7 +52,10 @@
 
             settings.formatter = {
               ruff-check.priority = 1;
-              ruff-format.priority = 2;
+              ruff-format = {
+                options = [ "--preview" ];
+                priority = 2;
+              };
             };
           };
         };

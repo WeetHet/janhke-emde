@@ -23,9 +23,13 @@ def all_levels(pts: np.ndarray, level: float):
     return all_level_points
 
 
-@njit(nopython=True, parallel=True)
+@njit(parallel=True)
 def find_level_segments(
-    x: np.ndarray, y: np.ndarray, z: np.ndarray, level: float, buffer: np.ndarray
+    x: np.ndarray,
+    y: np.ndarray,
+    z: np.ndarray,
+    level: float,
+    buffer: np.ndarray,
 ) -> np.ndarray:
     x_iter, y_iter = x.shape[0] - 1, y.shape[1] - 1
 
@@ -82,15 +86,14 @@ def decompose_levels_as_cycles_and_paths(
     for component in nx.connected_components(G):
         if len(component) > 1:
             subgraph = G.subgraph(component)
-            if not any(all(v in cycle for cycle in cycles) for v in subgraph.nodes()):
-                degree_one_vertices = [
-                    v for v in subgraph.nodes() if subgraph.degree(v) == 1
-                ]
-                if len(degree_one_vertices) >= 2:
-                    path = nx.shortest_path(
-                        subgraph, degree_one_vertices[0], degree_one_vertices[1]
-                    )
-                    path_points = np.array([unique_points[i] for i in path])
-                    paths.append(path_points)
+            degree_one_vertices = [
+                v for v in subgraph.nodes() if subgraph.degree(v) == 1
+            ]
+            if len(degree_one_vertices) >= 2:
+                path = nx.shortest_path(
+                    subgraph, degree_one_vertices[0], degree_one_vertices[1]
+                )
+                path_points = np.array([unique_points[i] for i in path])
+                paths.append(path_points)
 
     return cycles, paths, G

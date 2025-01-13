@@ -12,9 +12,10 @@ def gradient_line(
     pts = [a]
 
     def do_step(p: np.ndarray, e: float) -> tuple[np.ndarray, float]:
-        grad = np.array(
-            (diff(config.func, p[0], p[1], 1, 0), diff(config.func, p[0], p[1], 0, 1))
-        )
+        grad = np.array((
+            diff(config.func, p[0], p[1], 1, 0),
+            diff(config.func, p[0], p[1], 0, 1),
+        ))
         e = float(
             config.gradient_gamma * e + (1 - config.gradient_gamma) * np.sum(grad**2)
         )
