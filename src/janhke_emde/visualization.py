@@ -77,9 +77,12 @@ def plot_level_curves(
             )
 
             moved_points = cycle + offsets
-
             curve = pv.lines_from_points(moved_points)
-            plotter.add_mesh(curve, color="black", line_width=2)
+            plotter.add_mesh(curve, color="red", line_width=2)
+
+            moved_points = cycle - offsets
+            curve = pv.lines_from_points(moved_points)
+            plotter.add_mesh(curve, color="red", line_width=2)
     print_with_config(config)
 
 
@@ -147,7 +150,7 @@ def plot_gradient_lines(plotter: pv.Plotter, config: VisualizationConfig) -> Non
                 moved_points[idx, 2] = zl_eps * (1 - t) + moved_points[idx, 2] * t
 
         gradient_curve = pv.lines_from_points(moved_points)
-        plotter.add_mesh(gradient_curve, color="black", line_width=2)
+        plotter.add_mesh(gradient_curve, color="green", line_width=2)
 
 
 def plot_cap(
@@ -159,24 +162,14 @@ def plot_cap(
     segments = buffer[non_nan_mask]
     cycles, paths, _ = decompose_levels_as_cycles_and_paths(segments)
 
-    for cycle in filter(lambda c: len(c) > 1, cycles):
-        lifted_cycle = cycle.copy()
-        lifted_cycle[:, 2] += move_by
+    for points in filter(lambda c: len(c) > 1, cycles + paths):
+        lifted_points = points.copy()
+        lifted_points[:, 2] += move_by
 
-        faces = np.ones((1, len(lifted_cycle) + 1), dtype=int)
-        faces[0, 0] = len(lifted_cycle)
-        faces[0, 1:] = np.arange(len(lifted_cycle))
-        poly = pv.PolyData(lifted_cycle, faces)
-        plotter.add_mesh(poly, color="black")
-
-    for path in filter(lambda p: len(p) > 1, paths):
-        lifted_path = path.copy()
-        lifted_path[:, 2] += move_by
-
-        faces = np.ones((1, len(lifted_path) + 1), dtype=int)
-        faces[0, 0] = len(lifted_path)
-        faces[0, 1:] = np.arange(len(lifted_path))
-        poly = pv.PolyData(lifted_path, faces)
+        faces = np.ones((1, len(lifted_points) + 1), dtype=int)
+        faces[0, 0] = len(lifted_points)
+        faces[0, 1:] = np.arange(len(lifted_points))
+        poly = pv.PolyData(lifted_points, faces)
         plotter.add_mesh(poly, color="black")
 
 
@@ -256,7 +249,7 @@ def visualize_surface(config: VisualizationConfig) -> None:
     plot_level_curves(plotter, x, y, z, buffer, config)
     plot_z_caps(plotter, x, y, z, buffer, config)
     plot_border_caps(plotter, x, y, z, buffer, config)
-    plot_gradient_lines(plotter, config)
+    # plot_gradient_lines(plotter, config)
 
     print_with_config(config, "Showing plot...")
     plotter.view_isometric()  # type: ignore
