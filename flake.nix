@@ -46,6 +46,7 @@
               check = true;
               format = true;
             };
+            programs.isort.enable = true;
             programs.nixfmt.enable = true;
             programs.shfmt.enable = true;
             programs.taplo.enable = true;
@@ -56,6 +57,7 @@
                 options = [ "--preview" ];
                 priority = 2;
               };
+              isort.priority = 3;
             };
           };
         };

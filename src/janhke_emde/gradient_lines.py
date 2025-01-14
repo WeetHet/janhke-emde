@@ -1,6 +1,7 @@
 import numpy as np
-from janhke_emde.functions import diff
+
 from janhke_emde.config import VisualizationConfig
+from janhke_emde.functions import diff
 
 
 def gradient_line(

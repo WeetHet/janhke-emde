@@ -1,12 +1,11 @@
 import numpy as np
 import pyvista as pv
+
 from janhke_emde.config import VisualizationConfig
-from janhke_emde.functions import gamma2d, diff
-from janhke_emde.level_curves import (
-    find_level_segments,
-    decompose_levels_as_cycles_and_paths,
-)
+from janhke_emde.functions import diff, gamma2d
 from janhke_emde.gradient_lines import gradient_line
+from janhke_emde.level_curves import (decompose_levels_as_cycles_and_paths,
+                                      find_level_segments)
 
 
 def print_with_config(config: VisualizationConfig, *args, **kwargs):

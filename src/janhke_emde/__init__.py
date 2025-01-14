@@ -1,5 +1,7 @@
-from janhke_emde.config import VisualizationConfig, VisualizationConfigBuilder, Bounds3D
+from janhke_emde.config import (Bounds3D, VisualizationConfig,
+                                VisualizationConfigBuilder)
 from janhke_emde.functions import gamma2d
+from janhke_emde.saddle_points import find_saddle_points, principal_curvatures
 from janhke_emde.visualization import visualize_surface
 
 __all__ = [
@@ -7,6 +9,8 @@ __all__ = [
     "VisualizationConfigBuilder",
     "Bounds3D",
     "visualize_surface",
+    "find_saddle_points",
+    "principal_curvatures",
 ]
 
 
