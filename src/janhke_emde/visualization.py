@@ -2,10 +2,13 @@ import numpy as np
 import pyvista as pv
 
 from janhke_emde.config import VisualizationConfig
-from janhke_emde.functions import diff, gamma2d
-from janhke_emde.gradient_lines import gradient_line
-from janhke_emde.level_curves import (decompose_levels_as_cycles_and_paths,
-                                      find_level_segments)
+from janhke_emde.functions import diff
+from janhke_emde.gradient_lines import gradient_lines
+from janhke_emde.level_curves import (
+    decompose_levels_as_cycles_and_paths,
+    find_level_segments,
+)
+from janhke_emde.critical_points import find_critical_points, principal_curvatures
 
 
 def print_with_config(config: VisualizationConfig, *args, **kwargs):
@@ -52,7 +55,7 @@ def plot_level_curves(
     print_with_config(config, "Working on level ", end="")
     for level in np.arange(config.level_start, config.level_end, config.level_step):
         print_with_config(config, f"{level:.1f}", end="; ", flush=True)
-        find_level_segments(x, y, z, level, buffer)
+        find_level_segments(x, y, z, float(level), buffer)
 
         nan_2d_mask = np.isnan(buffer)
         non_nan_mask = ~np.any(nan_2d_mask, axis=(1, 2))
@@ -61,8 +64,8 @@ def plot_level_curves(
         cycles, paths, _ = decompose_levels_as_cycles_and_paths(segments)
         for cycle in cycles + [np.array(p) for p in paths]:
             points = cycle[:, :2]
-            dx = diff(gamma2d, points[:, 0], points[:, 1], 1, 0)
-            dy = diff(gamma2d, points[:, 0], points[:, 1], 0, 1)
+            dx = diff(config.func, points[:, 0], points[:, 1], 1, 0)
+            dy = diff(config.func, points[:, 0], points[:, 1], 0, 1)
             gradients = np.column_stack((dx, dy, np.zeros_like(dx)))
 
             gradient_magnitudes = np.linalg.norm(gradients, axis=1)
@@ -85,7 +88,11 @@ def plot_level_curves(
     print_with_config(config)
 
 
-def plot_gradient_lines(plotter: pv.Plotter, config: VisualizationConfig) -> None:
+def plot_gradient_lines(
+    plotter: pv.Plotter,
+    config: VisualizationConfig,
+    additional_points: np.ndarray,
+) -> None:
     print_with_config(config, "Drawing gradient lines...")
 
     points_per_side = config.gradient_points
@@ -106,31 +113,34 @@ def plot_gradient_lines(plotter: pv.Plotter, config: VisualizationConfig) -> Non
         np.full(points_per_side, config.bounds.yu),
     ))
 
-    starting_points = np.vstack((left_points, right_points, bottom_points, top_points))
+    starting_points = np.vstack((
+        left_points,
+        right_points,
+        bottom_points,
+        top_points,
+        additional_points,
+    ))
 
-    for start_pt in starting_points:
-        gradient_pts = gradient_line(
-            config,
-            start_pt[0],
-            start_pt[1],
-        )
-        if len(gradient_pts) <= 3:
-            continue
-        gradient_z = gamma2d(gradient_pts[:, 0], gradient_pts[:, 1])
-        points_3d = np.column_stack((gradient_pts, gradient_z))
+    for down in [False, True]:
+        gradient_pts, last_valid = gradient_lines(config, starting_points, down)
+        gradient_pts = gradient_pts[last_valid >= 2]
 
-        dx = diff(gamma2d, gradient_pts[:, 0], gradient_pts[:, 1], 1, 0)
-        dy = diff(gamma2d, gradient_pts[:, 0], gradient_pts[:, 1], 0, 1)
-        gradients = np.column_stack((dx, dy, np.zeros_like(dx)))
+        gradient_z = config.func(gradient_pts[..., 0], gradient_pts[..., 1])
+        points_3d = np.dstack((gradient_pts, gradient_z))
 
-        gradient_magnitudes = np.linalg.norm(gradients, axis=1)
+        dx = diff(config.func, gradient_pts[..., 0], gradient_pts[..., 1], 1, 0)
+        dy = diff(config.func, gradient_pts[..., 0], gradient_pts[..., 1], 0, 1)
+
+        gradients = np.dstack((dx, dy, np.zeros_like(dx)))
+
+        gradient_magnitudes = np.linalg.norm(gradients, axis=-1)
         base_offset = 0.01
         adaptive_scales = 1 / (1 + gradient_magnitudes)
         offsets = (
             -base_offset
-            * adaptive_scales[:, np.newaxis]
+            * adaptive_scales[..., np.newaxis]
             * gradients
-            / (gradient_magnitudes[:, np.newaxis] + 1e-8)
+            / (gradient_magnitudes[..., np.newaxis] + 1e-8)
         )
 
         moved_points = np.clip(
@@ -138,18 +148,9 @@ def plot_gradient_lines(plotter: pv.Plotter, config: VisualizationConfig) -> Non
             np.array([config.bounds.xl, config.bounds.yl, 0]),
             np.array([config.bounds.xu, config.bounds.yu, config.level_end]),
         )
-
-        zl_eps = config.level_end + 2e-3
-        if len(moved_points) > 0 and abs(moved_points[-1, 2] - config.level_end) < 0.5:
-            moved_points[-1, 2] = zl_eps
-            n_points = min(5, len(moved_points))
-            for i in range(n_points):
-                idx = -1 - i
-                t = i / n_points
-                moved_points[idx, 2] = zl_eps * (1 - t) + moved_points[idx, 2] * t
-
-        gradient_curve = pv.lines_from_points(moved_points)
-        plotter.add_mesh(gradient_curve, color="green", line_width=2)
+        for line in moved_points:
+            gradient_curve = pv.lines_from_points(line)
+            plotter.add_mesh(gradient_curve, color="green", line_width=2)
 
 
 def plot_cap(
@@ -245,10 +246,25 @@ def visualize_surface(config: VisualizationConfig) -> None:
     setup_surface(plotter, x, y, z, config)
 
     buffer = np.zeros((4 * x.shape[0] * y.shape[1], 2, 3))
+
     plot_level_curves(plotter, x, y, z, buffer, config)
     plot_z_caps(plotter, x, y, z, buffer, config)
     plot_border_caps(plotter, x, y, z, buffer, config)
-    # plot_gradient_lines(plotter, config)
+
+    px, py, _ = find_critical_points(config)
+    _, _, v1, v2 = principal_curvatures(config.func, px, py)
+
+    crit_pts = np.column_stack((px, py))
+    plot_gradient_lines(
+        plotter,
+        config,
+        additional_points=np.concat((
+            crit_pts + v1 * 1e-6,
+            crit_pts - v1 * 1e-6,
+            crit_pts + v2 * 1e-6,
+            crit_pts - v2 * 1e-6,
+        )),
+    )
 
     print_with_config(config, "Showing plot...")
     plotter.view_isometric()  # type: ignore

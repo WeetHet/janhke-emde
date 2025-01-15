@@ -11,11 +11,11 @@ class Bounds3D:
     zl: float
     zu: float
 
-    def in_bounds(self, x: float, y: float, z: float) -> bool:
+    def in_bounds(self, x, y, z):
         return (
-            self.xl <= x <= self.xu
-            and self.yl <= y <= self.yu
-            and self.zl <= z <= self.zu
+            ((self.xl <= x) & (x <= self.xu))
+            & ((self.yl <= y) & (y <= self.yu))
+            & ((self.zl <= z) & (z <= self.zu))
         )
 
 
@@ -23,24 +23,38 @@ class Bounds3D:
 class VisualizationConfig:
     bounds: Bounds3D
     mesh_points: int
+    critical_points: int
+    randomize_critical_grid: bool
     level_start: float
     level_end: float
     level_step: float
     gradient_gamma: float
     gradient_alpha: float
-    gradient_maxiter: float
+    gradient_maxiter: int
     gradient_points: int
     func: Callable
     log_steps: bool
 
 
 class VisualizationConfigBuilder:
+    randomize_critical_grid: bool = False
+
     def with_bounds(self, bounds: Bounds3D) -> "VisualizationConfigBuilder":
         self.bounds = bounds
         return self
 
     def with_mesh_points(self, points: int) -> "VisualizationConfigBuilder":
         self.mesh_points = points
+        return self
+
+    def with_critical_points(self, points: int) -> "VisualizationConfigBuilder":
+        self.critical_points = points
+        return self
+
+    def with_randomize_critical_grid(
+        self, randomize_critical_grid: bool
+    ) -> "VisualizationConfigBuilder":
+        self.randomize_critical_grid = randomize_critical_grid
         return self
 
     def with_level_params(
@@ -78,6 +92,8 @@ class VisualizationConfigBuilder:
             "bounds",
             "func",
             "mesh_points",
+            "critical_points",
+            "randomize_critical_grid",
             "level_start",
             "level_end",
             "level_step",
@@ -95,6 +111,8 @@ class VisualizationConfigBuilder:
             bounds=self.bounds,
             func=self.func,
             mesh_points=self.mesh_points,
+            critical_points=self.critical_points,
+            randomize_critical_grid=self.randomize_critical_grid,
             level_start=self.level_start,
             level_end=self.level_end,
             level_step=self.level_step,
