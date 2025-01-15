@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np  # noqa: F401
 
 from janhke_emde.config import Bounds3D, VisualizationConfig, VisualizationConfigBuilder
 from janhke_emde.critical_points import (
