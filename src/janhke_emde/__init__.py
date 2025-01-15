@@ -26,7 +26,7 @@ __all__ = [
 ]
 
 
-def build_generic_config(bounds: Bounds3D, func):
+def build_generic_config(bounds: Bounds3D, func, z_cap_move: float):
     return (
         VisualizationConfigBuilder()
         .with_bounds(bounds)
@@ -43,14 +43,14 @@ def build_generic_config(bounds: Bounds3D, func):
 
 def run_with_zeta2d():
     bounds = Bounds3D(xl=-4, xu=4, yl=-30, yu=30, zl=0, zu=5)
-    config = build_generic_config(bounds, zeta2d)
+    config = build_generic_config(bounds, zeta2d, -3e-2)
 
     visualize_surface(config)
 
 
 def run_with_gamma2d():
     bounds = Bounds3D(xl=-6, xu=4, yl=-3, yu=3, zl=0, zu=5)
-    config = build_generic_config(bounds, gamma2d)
+    config = build_generic_config(bounds, gamma2d, 5e-3)
 
     visualize_surface(config)
 

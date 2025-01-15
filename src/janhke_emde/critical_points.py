@@ -35,6 +35,7 @@ def find_critical_points(
         delta = np.matvec(H_1, grad)
         x -= delta[:, :, 0]
         y -= delta[:, :, 1]
+
     z = func(x, y)
     pts = np.stack((x, y, z), axis=-1)
     pts = pts[

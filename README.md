@@ -42,7 +42,7 @@ visualize_surface(config)
 
 ## Configuration Options
 
-- `bounds`: x, y and z bounds for visualization
+- `bounds`: x, y, and z bounds for visualization
 - `mesh_points`: Number of points per side to use in the surface mesh grid
 - `critical_points`: Number of points per side to use when searching for critical points
 - `randomize_critical_grid`: Boolean flag to randomize the critical point search grid
@@ -55,6 +55,8 @@ visualize_surface(config)
 - `gradient_points`: Number of starting points for gradient lines on each boundary
 - `func`: Callable function to visualize, takes x,y coordinates and returns z value
 - `log_steps`: Boolean flag to enable progress logging
+- `bounding_box`: Boolean flag to enable bounding box visualization
+- `z_cap_move`: Vertical offset for the z-cap
 
 ## Requirements
 

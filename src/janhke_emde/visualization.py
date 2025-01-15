@@ -155,9 +155,7 @@ def plot_gradient_lines(
             plotter.add_mesh(gradient_curve, color=color, line_width=2)
 
 
-def plot_cap(
-    plotter: pv.Plotter, buffer: np.ndarray, move_by: float, config: VisualizationConfig
-):
+def plot_cap(plotter: pv.Plotter, buffer: np.ndarray, config: VisualizationConfig):
     nan_2d_mask = np.isnan(buffer)
     non_nan_mask = ~np.any(nan_2d_mask, axis=(1, 2))
 
@@ -166,7 +164,7 @@ def plot_cap(
 
     for points in filter(lambda c: len(c) > 1, cycles + paths):
         lifted_points = points.copy()
-        lifted_points[:, 2] += move_by
+        lifted_points[:, 2] += config.z_cap_move
 
         faces = np.ones((1, len(lifted_points) + 1), dtype=int)
         faces[0, 0] = len(lifted_points)
@@ -185,7 +183,7 @@ def plot_z_caps(
 ) -> None:
     print_with_config(config, "Drawing z caps...")
     find_level_segments(x, y, z, config.level_end - 1e-8, buffer)
-    plot_cap(plotter, buffer, 5e-3, config)
+    plot_cap(plotter, buffer, config)
 
 
 def plot_border_caps(

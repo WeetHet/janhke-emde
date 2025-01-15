@@ -36,6 +36,7 @@ class VisualizationConfig:
     log_steps: bool
     debug: bool
     bounding_box: bool = False
+    z_cap_move: float = 0.0
 
 
 class VisualizationConfigBuilder:
@@ -99,6 +100,10 @@ class VisualizationConfigBuilder:
         self.bounding_box = enable
         return self
 
+    def with_z_cap_move(self, move_by: float) -> "VisualizationConfigBuilder":
+        self.z_cap_move = move_by
+        return self
+
     def build(self) -> VisualizationConfig:
         required_attrs = [
             "bounds",
@@ -135,4 +140,5 @@ class VisualizationConfigBuilder:
             log_steps=getattr(self, "log_steps", False),
             debug=getattr(self, "debug", False),
             bounding_box=getattr(self, "bounding_box", False),
+            z_cap_move=getattr(self, "z_cap_move", 0.0),
         )
