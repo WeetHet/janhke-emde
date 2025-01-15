@@ -63,3 +63,9 @@ visualize_surface(config)
 - PyVista
 - NetworkX
 - Numba
+
+## Structure
+
+![Structure diagram](images/structure.png)
+
+See the original DOT file [here](images/structure.dot)

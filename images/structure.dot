@@ -1,0 +1,68 @@
+digraph G {
+    node [style=rounded, shape=box]
+
+    input_config [label="Configuration"]
+    mesh_setup [label="Mesh Grid"]
+    surface_setup [label="3D Surface"]
+
+    subgraph cluster_caps {
+        label = "Caps"
+        style = "dashed,rounded"
+        z_caps [label="Z-Axis"]
+        border_caps [label="Border"]
+        cap_rendering [label="Rendering"]
+    }
+
+    subgraph cluster_levels {
+        label = "Level Curves"
+        style = "dashed,rounded"
+        level_curves [label="Level Curves"]
+        level_segments [label="Segmentation"]
+        level_decomposition [label="Cycles and Paths"]
+        level_rendering [label="Rendering"]
+    }
+
+    subgraph cluster_gradient {
+        label = "Gradient Lines"
+        style = "dashed,rounded"
+        critical_points [label="Critical Points"]
+        principal_curvatures [label="Principal Curvatures"]
+        border_points [label="Border Point Generation"]
+        gradient_search [label="Gradient Lines"]
+        gradient_rendering [label="Rendering"]
+
+        subgraph cluster_math {
+            label = "Math Tools"
+            style = "dashed,rounded"
+            node [style="dashed,rounded"]
+
+            hessian [label="Hessian"]
+            eig [label="Eigenvectors"]
+            newton [label="Newton—Raphson"]
+        }
+    }
+
+
+    input_config -> mesh_setup
+    mesh_setup -> surface_setup
+    surface_setup -> {level_curves critical_points border_points z_caps border_caps}
+
+    level_curves -> level_segments
+    level_segments -> level_decomposition
+    level_decomposition -> level_rendering
+    level_decomposition -> z_caps
+
+    critical_points -> principal_curvatures
+    critical_points -> newton [style="dashed"]
+    newton -> hessian [style="dashed"]
+    {principal_curvatures border_points} -> gradient_search
+    principal_curvatures -> hessian [style="dashed"]
+    principal_curvatures -> eig [style="dashed"]
+    gradient_search -> gradient_rendering
+
+    z_caps -> cap_rendering
+    border_caps -> cap_rendering
+
+    {level_rendering gradient_rendering cap_rendering} -> visual_output
+    visual_output [label = "Combined visual output"]
+}
