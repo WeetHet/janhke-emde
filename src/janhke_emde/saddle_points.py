@@ -3,27 +3,19 @@ import numpy as np
 from janhke_emde.functions import diff, hessian
 
 
-def find_saddle_points(
+def find_critical_points(
     x: np.ndarray, y: np.ndarray, z: np.ndarray, f, threshold: float = 1e-6
 ) -> np.ndarray:
     """
-    Find approximate saddle points on a grid by locating points where both partial
-    derivatives change sign and are close to zero.
+    Find critical points on a grid by locating points where both partial derivatives are close to zero.
     """
     dx = diff(f, x, y, 1, 0)
     dy = diff(f, x, y, 0, 1)
 
-    dx_sign_changes = dx[:-1, :] * dx[1:, :] < 0
-    dy_sign_changes = dy[:, :-1] * dy[:, 1:] < 0
-
     dx_zeros = np.abs(dx) < threshold
     dy_zeros = np.abs(dy) < threshold
 
-    saddle_mask = (dx_sign_changes | dx_zeros[:-1, :]) & (
-        dy_sign_changes | dy_zeros[:, :-1]
-    )
-
-    saddle_indices = np.nonzero(saddle_mask)
+    saddle_indices = dx_zeros & dy_zeros
 
     potential_saddles = np.column_stack((
         x[saddle_indices],

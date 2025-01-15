@@ -1,7 +1,6 @@
-from janhke_emde.config import (Bounds3D, VisualizationConfig,
-                                VisualizationConfigBuilder)
+from janhke_emde.config import Bounds3D, VisualizationConfig, VisualizationConfigBuilder
 from janhke_emde.functions import gamma2d
-from janhke_emde.saddle_points import find_saddle_points, principal_curvatures
+from janhke_emde.saddle_points import find_critical_points, principal_curvatures
 from janhke_emde.visualization import visualize_surface
 
 __all__ = [
@@ -9,12 +8,14 @@ __all__ = [
     "VisualizationConfigBuilder",
     "Bounds3D",
     "visualize_surface",
-    "find_saddle_points",
+    "find_critical_points",
     "principal_curvatures",
 ]
 
 
 def main():
+    import numpy as np
+
     bounds = Bounds3D(xl=-6, xu=4, yl=-3, yu=3, zl=0, zu=5)
 
     config = (
@@ -29,4 +30,14 @@ def main():
         .build()
     )
 
-    visualize_surface(config)
+    x, y = np.meshgrid(
+        np.linspace(config.bounds.xl, config.bounds.xu, config.mesh_points),
+        np.linspace(config.bounds.yl, config.bounds.yu, config.mesh_points),
+    )
+
+    z = gamma2d(x, y)
+
+    sp = find_critical_points(x, y, z, gamma2d)
+    print(sp)
+
+    # visualize_surface(config)
