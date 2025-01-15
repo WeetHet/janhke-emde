@@ -1,10 +1,7 @@
 import numpy as np  # noqa: F401
 
 from janhke_emde.config import Bounds3D, VisualizationConfig, VisualizationConfigBuilder
-from janhke_emde.critical_points import (
-    find_critical_points,
-    principal_curvatures,
-)
+from janhke_emde.critical_points import find_critical_points, principal_curvatures
 from janhke_emde.functions import gamma2d
 from janhke_emde.visualization import visualize_surface
 

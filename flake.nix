@@ -46,18 +46,17 @@
               check = true;
               format = true;
             };
-            programs.isort.enable = true;
             programs.nixfmt.enable = true;
             programs.shfmt.enable = true;
             programs.taplo.enable = true;
 
-            settings.formatter = {
-              ruff-check.priority = 1;
-              ruff-format = {
-                options = [ "--preview" ];
-                priority = 2;
-              };
-              isort.priority = 3;
+            settings = {
+              excludes = [
+                "*.md"
+                "nix"
+              ];
+              formatter.ruff-check.priority = 1;
+              formatter.ruff-format.priority = 2;
             };
           };
         };

@@ -11,3 +11,9 @@ dependencies = ["numpy", "sympy", "scipy", "pyvista", "networkx", "numba"]
 
 [project.scripts]
 janhke_emde = "janhke_emde:main"
+
+[tool.ruff]
+preview = true
+
+[tool.ruff.lint]
+extend-select = ["I"]

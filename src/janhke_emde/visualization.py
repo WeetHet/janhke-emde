@@ -2,13 +2,13 @@ import numpy as np
 import pyvista as pv
 
 from janhke_emde.config import VisualizationConfig
+from janhke_emde.critical_points import find_critical_points, principal_curvatures
 from janhke_emde.functions import diff
 from janhke_emde.gradient_lines import gradient_lines
 from janhke_emde.level_curves import (
     decompose_levels_as_cycles_and_paths,
     find_level_segments,
 )
-from janhke_emde.critical_points import find_critical_points, principal_curvatures
 
 
 def print_with_config(config: VisualizationConfig, *args, **kwargs):
