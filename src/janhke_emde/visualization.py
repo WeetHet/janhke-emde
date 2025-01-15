@@ -151,9 +151,8 @@ def plot_gradient_lines(
         )
         for line in moved_points:
             gradient_curve = pv.lines_from_points(line)
-            plotter.add_mesh(
-                gradient_curve, color="green" if config.debug else "red", line_width=2
-            )
+            color = "green" if config.debug else "black"
+            plotter.add_mesh(gradient_curve, color=color, line_width=2)
 
 
 def plot_cap(
@@ -226,7 +225,7 @@ def plot_border_caps(
         poly = pv.PolyData(points_with_zero, faces)
         plotter.add_mesh(poly, color="white", show_edges=False, lighting=False)
 
-        for i in range(0, len(points) - 1, max(1, len(points) // 20)):
+        for i in range(0, len(points) - 1, max(1, len(points) // 40)):
             x, y, _ = points[i]
             hatching = pv.lines_from_points([points[i], np.array([x, y, 0])])
             plotter.add_mesh(hatching, color="black", line_width=3)
