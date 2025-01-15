@@ -40,7 +40,7 @@ def setup_surface(
     grid = pv.StructuredGrid(x, y, z)
     print_with_config(config, "Plotting surface...")
     plotter.add_mesh(
-        grid, color="white", show_edges=False, lighting=False, silhouette=True
+        grid, color="white", show_edges=False, lighting=config.debug, silhouette=True
     )
 
 
@@ -80,11 +80,12 @@ def plot_level_curves(
 
             moved_points = cycle + offsets
             curve = pv.lines_from_points(moved_points)
-            plotter.add_mesh(curve, color="red", line_width=2)
+            color = "red" if config.debug else "black"
+            plotter.add_mesh(curve, color=color, line_width=2)
 
             moved_points = cycle - offsets
             curve = pv.lines_from_points(moved_points)
-            plotter.add_mesh(curve, color="red", line_width=2)
+            plotter.add_mesh(curve, color=color, line_width=2)
     print_with_config(config)
 
 
@@ -150,7 +151,9 @@ def plot_gradient_lines(
         )
         for line in moved_points:
             gradient_curve = pv.lines_from_points(line)
-            plotter.add_mesh(gradient_curve, color="green", line_width=2)
+            plotter.add_mesh(
+                gradient_curve, color="green" if config.debug else "red", line_width=2
+            )
 
 
 def plot_cap(

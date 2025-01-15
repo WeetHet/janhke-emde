@@ -30,7 +30,7 @@ def main():
         .with_level_params(0.2, 5.0, 0.2)
         .with_gradient_params(gamma=0.9, alpha=0.001, maxiter=10000)
         .with_gradient_points(20)
-        .with_log_steps(True)
+        .with_log_steps()
         .build()
     )
 

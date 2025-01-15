@@ -30,10 +30,11 @@ class VisualizationConfig:
     level_step: float
     gradient_gamma: float
     gradient_alpha: float
-    gradient_maxiter: int
+    gradient_iter: int
     gradient_points: int
     func: Callable
     log_steps: bool
+    debug: bool
 
 
 class VisualizationConfigBuilder:
@@ -70,7 +71,7 @@ class VisualizationConfigBuilder:
     ) -> "VisualizationConfigBuilder":
         self.gradient_gamma = gamma
         self.gradient_alpha = alpha
-        self.gradient_maxiter = maxiter
+        self.gradient_iter = maxiter
         return self
 
     def with_gradient_points(self, points: int) -> "VisualizationConfigBuilder":
@@ -83,8 +84,14 @@ class VisualizationConfigBuilder:
         self.func = func
         return self
 
-    def with_log_steps(self, log_steps: bool) -> "VisualizationConfigBuilder":
-        self.log_steps = log_steps
+    def with_log_steps(self) -> "VisualizationConfigBuilder":
+        self.log_steps = True
+        return self
+
+    def with_debug(
+        self,
+    ) -> "VisualizationConfigBuilder":
+        self.debug = True
         return self
 
     def build(self) -> VisualizationConfig:
@@ -99,7 +106,7 @@ class VisualizationConfigBuilder:
             "level_step",
             "gradient_gamma",
             "gradient_alpha",
-            "gradient_maxiter",
+            "gradient_iter",
             "gradient_points",
         ]
 
@@ -118,7 +125,8 @@ class VisualizationConfigBuilder:
             level_step=self.level_step,
             gradient_gamma=self.gradient_gamma,
             gradient_alpha=self.gradient_alpha,
-            gradient_maxiter=self.gradient_maxiter,
+            gradient_iter=self.gradient_iter,
             gradient_points=self.gradient_points,
             log_steps=getattr(self, "log_steps", False),
+            debug=getattr(self, "debug", False),
         )

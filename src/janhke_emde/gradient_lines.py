@@ -24,7 +24,7 @@ def gradient_lines(
 
     pts = [a]
     b, e = do_step(a, np.zeros_like(a[:, 0]))
-    for _ in range(config.gradient_maxiter - 1):
+    for _ in range(config.gradient_iter - 1):
         pts.append(b)
         a, (b, e) = b, do_step(b, e)
     pts.append(b)
