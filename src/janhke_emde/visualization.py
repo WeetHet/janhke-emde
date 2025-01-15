@@ -241,7 +241,23 @@ def plot_border_caps(
         plotter.add_mesh(points_curve, color="black", line_width=2)
 
 
-def visualize_surface(config: VisualizationConfig) -> None:
+def plot_bounding_box(plotter: pv.Plotter, config: VisualizationConfig):
+    bounds = config.bounds
+
+    box: pv.PolyData = pv.Cube(
+        center=(
+            (bounds.xl + bounds.xu) / 2,
+            (bounds.yl + bounds.yu) / 2,
+            (bounds.zl + bounds.zu) / 2,
+        ),
+        x_length=(bounds.xu - bounds.xl),
+        y_length=(bounds.yu - bounds.yl),
+        z_length=(bounds.zu - bounds.zl),
+    )  # type: ignore
+    plotter.add_mesh(box.outline(), color="black", line_width=3)
+
+
+def visualize_surface(config: VisualizationConfig):
     """Main entry point for visualizing the Jahnke-Emde surface with level curves and gradient lines."""
     plotter = pv.Plotter()
     x, y, z = create_mesh_grid(config)
@@ -253,7 +269,10 @@ def visualize_surface(config: VisualizationConfig) -> None:
     plot_z_caps(plotter, x, y, z, buffer, config)
     plot_border_caps(plotter, x, y, z, buffer, config)
 
-    px, py, _ = find_critical_points(config)
+    print("Finding critical points...")
+    with np.testing.suppress_warnings() as sup:
+        sup.filter(RuntimeWarning)
+        px, py, _ = find_critical_points(config)
     _, _, v1, v2 = principal_curvatures(config.func, px, py)
 
     crit_pts = np.column_stack((px, py))
@@ -267,6 +286,10 @@ def visualize_surface(config: VisualizationConfig) -> None:
             crit_pts - v2 * 1e-6,
         )),
     )
+
+    if config.bounding_box:
+        print_with_config(config, "Drawing a bounding box...")
+        plot_bounding_box(plotter, config)
 
     print_with_config(config, "Showing plot...")
     plotter.view_isometric()  # type: ignore

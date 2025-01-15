@@ -16,7 +16,10 @@
     inputs@{ self, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = inputs.nixpkgs.lib.systems.flakeExposed;
-      imports = [ inputs.treefmt-nix.flakeModule ];
+      imports = [
+        inputs.treefmt-nix.flakeModule
+        ./defs/useScipy1.15.nix
+      ];
 
       flake = {
         project = inputs.pyproject-nix.lib.project.loadPyproject {

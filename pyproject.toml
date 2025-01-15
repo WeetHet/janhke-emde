@@ -7,7 +7,7 @@ name = "janhke_emde"
 version = "0.1.0"
 description = "Visualization of Jahnke-Emde surfaces with level curves and gradient lines."
 authors = [{ name = "WeetHet", email = "stas.ale66@gmail.com" }]
-dependencies = ["numpy", "sympy", "scipy", "pyvista", "networkx", "numba"]
+dependencies = ["numpy ~= 2.0", "scipy ~= 1.15", "pyvista", "networkx", "numba"]
 
 [project.scripts]
 janhke_emde = "janhke_emde:main"

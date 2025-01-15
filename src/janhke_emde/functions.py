@@ -1,16 +1,10 @@
 import numpy as np
-from scipy.special import gamma
 
 
 def unique_tolerance(a: np.ndarray, tol: float):
     ai = (a / tol).astype(int)
     _, idx = np.unique(ai, return_index=True, axis=0)
     return a[idx]
-
-
-def gamma2d(x, y):
-    """Compute the absolute value of the gamma function for complex input x + yi."""
-    return np.abs(gamma(x + y * 1j))
 
 
 def diff(f, x, y, dx, dy, step=1e-6):

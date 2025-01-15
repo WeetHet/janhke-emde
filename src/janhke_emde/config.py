@@ -35,6 +35,7 @@ class VisualizationConfig:
     func: Callable
     log_steps: bool
     debug: bool
+    bounding_box: bool = False
 
 
 class VisualizationConfigBuilder:
@@ -94,6 +95,10 @@ class VisualizationConfigBuilder:
         self.debug = True
         return self
 
+    def with_bounding_box(self, enable: bool = True) -> "VisualizationConfigBuilder":
+        self.bounding_box = enable
+        return self
+
     def build(self) -> VisualizationConfig:
         required_attrs = [
             "bounds",
@@ -129,4 +134,5 @@ class VisualizationConfigBuilder:
             gradient_points=self.gradient_points,
             log_steps=getattr(self, "log_steps", False),
             debug=getattr(self, "debug", False),
+            bounding_box=getattr(self, "bounding_box", False),
         )
