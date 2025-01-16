@@ -34,6 +34,7 @@ def build_generic_config(bounds: Bounds3D, func, z_cap_move: float):
         .with_mesh_points(1000)
         .with_critical_points(200)
         .with_level_params(0.2, 5.0, 0.2)
+        .with_z_cap_move(z_cap_move)
         .with_gradient_params(gamma=0.9, alpha=0.001, maxiter=10000)
         .with_gradient_points(20)
         .with_log_steps()
