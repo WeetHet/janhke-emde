@@ -54,10 +54,8 @@ class VisualizationConfigBuilder:
         self.critical_points = points
         return self
 
-    def with_randomize_critical_grid(
-        self, randomize_critical_grid: bool
-    ) -> "VisualizationConfigBuilder":
-        self.randomize_critical_grid = randomize_critical_grid
+    def with_randomize_critical_grid(self) -> "VisualizationConfigBuilder":
+        self.randomize_critical_grid = True
         return self
 
     def with_level_params(
