@@ -57,5 +57,5 @@ def run_with_gamma2d():
 
 
 def main():
-    run_with_gamma2d()
-    # run_with_zeta2d()
+    # run_with_gamma2d()
+    run_with_zeta2d()
