@@ -1,5 +1,12 @@
 # Janhke-Emde Style Function Visualization
 
+## Demonstration
+
+<p style="display: flex; align-items: center; justify-content: space-around;">
+  <img src="images/gamma.png" height="230" />
+  <img src="images/zeta.png" height="230" />
+</p>
+
 ## Features
 
 - Janhke-Emde style function surface style
